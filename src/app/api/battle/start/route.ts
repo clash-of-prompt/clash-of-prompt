@@ -6,7 +6,7 @@ import { generateBattleIntro } from "@/lib/claude";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { enemyId } = body;
+    const { enemyId, locale } = body;
 
     if (!enemyId || typeof enemyId !== "number") {
       return NextResponse.json(
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const intro = generateBattleIntro(enemy);
+    const intro = generateBattleIntro(enemy, locale || "en");
 
     return NextResponse.json({
       battle: getBattleSummary(battle),

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import I18nProvider from "@/components/I18nProvider";
 
 export const metadata: Metadata = {
   title: "Prompt Wars - AI Battle Arena",
@@ -14,7 +15,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="crt-flicker">{children}</body>
+      <body className="crt-flicker">
+        <I18nProvider>{children}</I18nProvider>
+      </body>
     </html>
   );
 }

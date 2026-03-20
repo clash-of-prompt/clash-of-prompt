@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useI18n } from "@/lib/i18n";
 
 interface EnemyInfo {
   id: number;
@@ -40,25 +41,26 @@ const DIFFICULTY_COLORS: Record<string, string> = {
   boss: "text-red glow-red",
 };
 
-const DIFFICULTY_LABELS: Record<string, string> = {
-  easy: "★ EASY",
-  medium: "★★ MEDIUM",
-  boss: "★★★ BOSS",
-};
-
 export default function EnemySelect({ onSelect, onBack }: EnemySelectProps) {
+  const { t, locale } = useI18n();
   const [enemies, setEnemies] = useState<EnemyInfo[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const DIFFICULTY_LABELS: Record<string, string> = {
+    easy: `★ ${t.difficulty_easy}`,
+    medium: `★★ ${t.difficulty_medium}`,
+    boss: `★★★ ${t.difficulty_boss}`,
+  };
+
   useEffect(() => {
     fetch("/api/enemies")
       .then((r) => r.json())
       .then((data) => { setEnemies(data.enemies); setLoading(false); })
-      .catch(() => { setError("Failed to load enemies"); setLoading(false); });
-  }, []);
+      .catch(() => { setError(t.load_enemies_fail); setLoading(false); });
+  }, [t.load_enemies_fail]);
 
   const handleFight = async () => {
     if (selected === null) return;
@@ -68,7 +70,7 @@ export default function EnemySelect({ onSelect, onBack }: EnemySelectProps) {
       const res = await fetch("/api/battle/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ enemyId: selected }),
+        body: JSON.stringify({ enemyId: selected, locale }),
       });
       if (!res.ok) throw new Error("Failed to start battle");
       const data = await res.json();
@@ -82,7 +84,7 @@ export default function EnemySelect({ onSelect, onBack }: EnemySelectProps) {
         initialBattle: data.battle,
       });
     } catch {
-      setError("Failed to start battle. Try again.");
+      setError(t.start_battle_fail);
       setStarting(false);
     }
   };
@@ -93,8 +95,8 @@ export default function EnemySelect({ onSelect, onBack }: EnemySelectProps) {
 
   return (
     <div className="fade-in">
-      <p className="text-cyan glow-cyan text-xl mb-1">{"> SELECT YOUR OPPONENT"}</p>
-      <p className="text-dim mb-6">Choose wisely. Harder enemies yield higher scores.</p>
+      <p className="text-cyan glow-cyan text-xl mb-1">{t.select_opponent}</p>
+      <p className="text-dim mb-6">{t.select_hint}</p>
 
       <div className="space-y-3 mb-6">
         {enemies.map((enemy) => (
@@ -108,12 +110,12 @@ export default function EnemySelect({ onSelect, onBack }: EnemySelectProps) {
                 </span>
               </div>
             </div>
-            <p className="text-dim text-sm mt-1">{enemy.description}</p>
+            <p className="text-dim text-sm mt-1">{t.enemy_descs[enemy.id] || enemy.description}</p>
             <div className="flex gap-6 mt-2 text-sm">
               <span className="text-red">HP:{enemy.hp}</span>
               <span className="text-amber">ATK:{enemy.atk}</span>
               <span className="text-cyan">DEF:{enemy.def}</span>
-              <span className="text-magenta">Weak: {enemy.weakness.join(", ")}</span>
+              <span className="text-magenta">{t.weak_label}: {enemy.weakness.map((w) => t.enemy_weakness[w] || w).join(", ")}</span>
             </div>
           </button>
         ))}
@@ -122,10 +124,10 @@ export default function EnemySelect({ onSelect, onBack }: EnemySelectProps) {
       {error && <p className="text-red mb-4">{error}</p>}
 
       <div className="flex gap-4">
-        <button onClick={onBack} className="terminal-btn text-dim">{"< BACK"}</button>
+        <button onClick={onBack} className="terminal-btn text-dim">{t.back}</button>
         {selected !== null && (
           <button onClick={handleFight} disabled={starting} className="terminal-btn text-green glow-green">
-            {starting ? "Initiating battle..." : "> FIGHT!"}
+            {starting ? t.initiating : t.fight}
           </button>
         )}
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useI18n } from "@/lib/i18n";
 
 interface BattleComicProps {
   panels: string[];
@@ -10,6 +11,7 @@ interface BattleComicProps {
 
 export default function BattleComic({ panels, labels, onDismiss }: BattleComicProps) {
   const [currentPanel, setCurrentPanel] = useState(0);
+  const { t } = useI18n();
 
   const advance = useCallback(() => {
     if (currentPanel < panels.length - 1) setCurrentPanel((p) => p + 1);
@@ -44,7 +46,7 @@ export default function BattleComic({ panels, labels, onDismiss }: BattleComicPr
           ))}
         </div>
         <p className="text-center text-dim text-sm mt-2">
-          {currentPanel < panels.length - 1 ? "Click or SPACE to continue" : "Click or SPACE to dismiss"}
+          {currentPanel < panels.length - 1 ? t.click_continue : t.click_dismiss}
         </p>
       </div>
     </div>

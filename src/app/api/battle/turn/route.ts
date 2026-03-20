@@ -14,7 +14,7 @@ const lastTurnTime = new Map<string, number>();
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { battleId, prompt } = body;
+    const { battleId, prompt, locale } = body;
 
     if (!battleId || typeof battleId !== "string") {
       return NextResponse.json(
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     lastTurnTime.set(battleId, now);
 
     // Get AI response
-    const aiResult = await getAIBattleTurn(battle, prompt.trim());
+    const aiResult = await getAIBattleTurn(battle, prompt.trim(), locale || "en");
 
     // Process turn with server-side validation
     const updatedBattle = processTurn(battleId, prompt.trim(), aiResult);
