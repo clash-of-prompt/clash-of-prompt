@@ -6,7 +6,6 @@ interface ImagePromptData {
 }
 
 export function buildImagePrompt(data: ImagePromptData): string {
-  // Extract key action phrases (first sentence of each narrative)
   const playerAction = extractFirstSentence(data.narrative);
   const enemyAction = extractFirstSentence(data.enemyNarrative);
 
@@ -22,7 +21,6 @@ Art style: 16-bit SNES-era RPG pixel art, limited color palette, clean pixel edg
 }
 
 function extractFirstSentence(text: string): string {
-  // Get first sentence, max 100 chars
   const match = text.match(/^[^.!?]+[.!?]/);
   const sentence = match ? match[0] : text.slice(0, 100);
   return sentence.slice(0, 120);

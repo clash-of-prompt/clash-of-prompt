@@ -1,5 +1,5 @@
-import { Enemy } from "./enemies";
-import { BattleState, getLastTurns } from "./game-engine";
+import { Enemy } from "./enemies.js";
+import { BattleState, getLastTurns } from "./game-engine.js";
 
 export function buildSystemPrompt(enemy: Enemy, locale: string = "en"): string {
   const langInstruction = locale === "id"

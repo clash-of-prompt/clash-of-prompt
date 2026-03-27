@@ -1,4 +1,4 @@
-import { Enemy, getEnemyById } from "./enemies";
+import { Enemy, getEnemyById } from "./enemies.js";
 
 // ── Game Constants (server-side, NOT AI decisions) ──────────────
 export const GAME_RULES = {
@@ -232,43 +232,25 @@ function applyStatusEffects(battle: BattleState) {
 
     if (effect.effect === "poison") {
       if (effect.target === "player") {
-        battle.playerHp = Math.max(
-          0,
-          battle.playerHp - GAME_RULES.POISON_DAMAGE
-        );
+        battle.playerHp = Math.max(0, battle.playerHp - GAME_RULES.POISON_DAMAGE);
       } else {
-        battle.enemyHp = Math.max(
-          0,
-          battle.enemyHp - GAME_RULES.POISON_DAMAGE
-        );
+        battle.enemyHp = Math.max(0, battle.enemyHp - GAME_RULES.POISON_DAMAGE);
       }
     }
 
     if (effect.effect === "burn") {
       if (effect.target === "player") {
-        battle.playerHp = Math.max(
-          0,
-          battle.playerHp - GAME_RULES.BURN_DAMAGE
-        );
+        battle.playerHp = Math.max(0, battle.playerHp - GAME_RULES.BURN_DAMAGE);
       } else {
-        battle.enemyHp = Math.max(
-          0,
-          battle.enemyHp - GAME_RULES.BURN_DAMAGE
-        );
+        battle.enemyHp = Math.max(0, battle.enemyHp - GAME_RULES.BURN_DAMAGE);
       }
     }
 
     if (effect.effect === "heal") {
       if (effect.target === "player") {
-        battle.playerHp = Math.min(
-          GAME_RULES.PLAYER_HP,
-          battle.playerHp + GAME_RULES.HEAL_AMOUNT
-        );
+        battle.playerHp = Math.min(GAME_RULES.PLAYER_HP, battle.playerHp + GAME_RULES.HEAL_AMOUNT);
       } else {
-        battle.enemyHp = Math.min(
-          battle.enemy.hp,
-          battle.enemyHp + GAME_RULES.HEAL_AMOUNT
-        );
+        battle.enemyHp = Math.min(battle.enemy.hp, battle.enemyHp + GAME_RULES.HEAL_AMOUNT);
       }
     }
 
@@ -314,32 +296,25 @@ function addStatusEffect(
 
 function calculateScore(battle: BattleState): number {
   if (battle.status === "defeat") {
-    // Partial score for how much damage dealt
     const damageDealt = battle.enemy.hp - battle.enemyHp;
     const damagePercent = damageDealt / battle.enemy.hp;
     return Math.round(damagePercent * 30);
   }
 
   let score = 0;
+  score += battle.status === "victory" ? 50 : 20;
 
-  // Base score for winning
-  score += battle.status === "victory" ? 50 : 20; // timeout = partial
-
-  // Bonus for fewer turns (efficiency)
   const turnBonus = Math.max(0, GAME_RULES.MAX_TURNS - battle.turn) * 2;
   score += turnBonus;
 
-  // Bonus for remaining HP
   const hpPercent = battle.playerHp / GAME_RULES.PLAYER_HP;
   score += Math.round(hpPercent * 20);
 
-  // Avg creativity bonus
   const avgCreativity =
     battle.turnHistory.reduce((sum, t) => sum + t.creativityScore, 0) /
     battle.turnHistory.length;
   score += Math.round(avgCreativity * 3);
 
-  // Difficulty multiplier
   const diffMult =
     battle.enemy.difficulty === "boss"
       ? 2.0

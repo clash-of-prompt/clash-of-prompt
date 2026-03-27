@@ -4,9 +4,9 @@ import { writeFile, unlink } from "fs/promises";
 import { tmpdir } from "os";
 import { join } from "path";
 import { z } from "zod";
-import { Enemy } from "./enemies";
-import { BattleState, AITurnResult } from "./game-engine";
-import { buildSystemPrompt, buildTurnMessage } from "./prompts";
+import { Enemy } from "./enemies.js";
+import { BattleState, AITurnResult } from "./game-engine.js";
+import { buildSystemPrompt, buildTurnMessage } from "./prompts.js";
 
 const execAsync = promisify(exec);
 
@@ -55,17 +55,11 @@ Respond with ONLY the JSON object. Nothing else.`;
 
   let stdout: string;
   try {
-    // Strip ANTHROPIC_API_KEY from env so Claude CLI uses its own OAuth credentials
-    const cleanEnv = { ...process.env };
-    delete cleanEnv.ANTHROPIC_API_KEY;
-    cleanEnv.PATH = (cleanEnv.PATH || "") + ":/Users/askar/.local/bin";
-
     const result = await execAsync(
-      `cat "${tmpFile}" | /Users/askar/.local/bin/claude -p --output-format text`,
+      `cat "${tmpFile}" | claude -p --output-format text`,
       {
         timeout: 45000,
         maxBuffer: 1024 * 1024,
-        env: cleanEnv,
       }
     );
     stdout = result.stdout;
@@ -105,7 +99,7 @@ Respond with ONLY the JSON object. Nothing else.`;
         ? null
         : parsed.enemy_status_effect,
     enemy_action_narrative: parsed.enemy_action_narrative,
-    battle_status: "ongoing", // Server determines this, not AI
+    battle_status: "ongoing",
   };
 }
 

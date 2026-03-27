@@ -1,25 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getBattle, getBattleSummary } from "@/lib/game-engine";
+
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8080";
 
 export async function GET(request: NextRequest) {
-  const battleId = request.nextUrl.searchParams.get("id");
-
-  if (!battleId) {
+  try {
+    const battleId = request.nextUrl.searchParams.get("id");
+    const res = await fetch(`${BACKEND_URL}/api/battle/status?id=${battleId}`);
+    const data = await res.json();
+    return NextResponse.json(data, { status: res.status });
+  } catch {
     return NextResponse.json(
-      { error: "Battle id is required" },
-      { status: 400 }
+      { error: "Backend unavailable" },
+      { status: 502 }
     );
   }
-
-  const battle = getBattle(battleId);
-  if (!battle) {
-    return NextResponse.json(
-      { error: "Battle not found or expired" },
-      { status: 404 }
-    );
-  }
-
-  return NextResponse.json({
-    battle: getBattleSummary(battle),
-  });
 }

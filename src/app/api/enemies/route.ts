@@ -1,17 +1,16 @@
 import { NextResponse } from "next/server";
-import { ENEMIES } from "@/lib/enemies";
+
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8080";
 
 export async function GET() {
-  const enemies = ENEMIES.map((e) => ({
-    id: e.id,
-    name: e.name,
-    hp: e.hp,
-    atk: e.atk,
-    def: e.def,
-    weakness: e.weakness,
-    description: e.description,
-    difficulty: e.difficulty,
-  }));
-
-  return NextResponse.json({ enemies });
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/enemies`);
+    const data = await res.json();
+    return NextResponse.json(data, { status: res.status });
+  } catch {
+    return NextResponse.json(
+      { error: "Backend unavailable" },
+      { status: 502 }
+    );
+  }
 }
