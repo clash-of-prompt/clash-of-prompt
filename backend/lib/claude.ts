@@ -106,17 +106,83 @@ Respond with ONLY the JSON object. Nothing else.`;
 export function generateBattleIntro(enemy: Enemy, locale: string = "en"): string {
   if (locale === "id") {
     const intros: Record<number, string> = {
-      1: `\n╔══════════════════════════════════════════╗\n║        👑 SLIME KING MUNCUL!             ║\n╚══════════════════════════════════════════╝\n\nGumpalan slime hijau yang bergoyang-goyang memakai mahkota\nemas kecil meluncur ke arena. Dia bergetar mengancam.\n\n"Hah! Penantang lagi? Aku serap kau dalam hitungan detik!"\n\nHP: ${enemy.hp}  ATK: ${enemy.atk}  DEF: ${enemy.def}\nKelemahan: ${enemy.weakness.join(", ")}\n`,
-      2: `\n╔══════════════════════════════════════════╗\n║      🐺 SHADOW WOLF MENGINTAIMU!         ║\n╚══════════════════════════════════════════╝\n\nMata merah menyala dari kegelapan saat serigala bayangan\nmewujud. Dia mengitarimu dalam diam.\n\n*Udara menjadi dingin. Kau hanya mendengar detak jantungmu sendiri.*\n\nHP: ${enemy.hp}  ATK: ${enemy.atk}  DEF: ${enemy.def}\nKelemahan: ${enemy.weakness.join(", ")}\n`,
-      3: `\n╔══════════════════════════════════════════╗\n║      🗿 ANCIENT GOLEM BANGKIT!           ║\n╚══════════════════════════════════════════╝\n\nTanah bergetar saat konstruksi batu kuno menjulang\ndi hadapanmu. Rune-rune bercahaya berdenyut di tubuhnya.\n\n"MANUSIA FANA... BUKTIKAN KELAYAKANMU... ATAU HANCUR LEBUR..."\n\nHP: ${enemy.hp}  ATK: ${enemy.atk}  DEF: ${enemy.def}\nKelemahan: ${enemy.weakness.join(", ")}\n`,
+      1: `======================================
+  SLIME KING MUNCUL!
+======================================
+
+Gumpalan slime hijau yang bergoyang-goyang memakai mahkota
+emas kecil meluncur ke arena. Dia bergetar mengancam.
+
+"Hah! Penantang lagi? Aku serap kau dalam hitungan detik!"
+
+HP: ${enemy.hp}  ATK: ${enemy.atk}  DEF: ${enemy.def}
+Kelemahan: ${enemy.weakness.join(", ")}
+`,
+      2: `======================================
+  SHADOW WOLF MENGINTAIMU!
+======================================
+
+Mata merah menyala dari kegelapan saat serigala bayangan
+mewujud. Dia mengitarimu dalam diam.
+
+*Udara menjadi dingin. Kau hanya mendengar detak jantungmu sendiri.*
+
+HP: ${enemy.hp}  ATK: ${enemy.atk}  DEF: ${enemy.def}
+Kelemahan: ${enemy.weakness.join(", ")}
+`,
+      3: `======================================
+  ANCIENT GOLEM BANGKIT!
+======================================
+
+Tanah bergetar saat konstruksi batu kuno menjulang
+di hadapanmu. Rune-rune bercahaya berdenyut di tubuhnya.
+
+"MANUSIA FANA... BUKTIKAN KELAYAKANMU... ATAU HANCUR LEBUR..."
+
+HP: ${enemy.hp}  ATK: ${enemy.atk}  DEF: ${enemy.def}
+Kelemahan: ${enemy.weakness.join(", ")}
+`,
     };
     return intros[enemy.id] ?? `${enemy.name} muncul!`;
   }
 
   const intros: Record<number, string> = {
-    1: `\n╔══════════════════════════════════════════╗\n║          👑 SLIME KING APPEARS!          ║\n╚══════════════════════════════════════════╝\n\nA wobbling mass of green slime wearing a tiny golden crown\nslides into the arena. It jiggles menacingly at you.\n\n"Hah! Another challenger? I'll absorb you in seconds!"\n\nHP: ${enemy.hp}  ATK: ${enemy.atk}  DEF: ${enemy.def}\nWeakness: ${enemy.weakness.join(", ")}\n`,
-    2: `\n╔══════════════════════════════════════════╗\n║        🐺 SHADOW WOLF STALKS YOU!        ║\n╚══════════════════════════════════════════╝\n\nRed eyes glow from the darkness as a wolf made of living\nshadow phases into existence. It circles you silently.\n\n*The air grows cold. You hear nothing but your own heartbeat.*\n\nHP: ${enemy.hp}  ATK: ${enemy.atk}  DEF: ${enemy.def}\nWeakness: ${enemy.weakness.join(", ")}\n`,
-    3: `\n╔══════════════════════════════════════════╗\n║      🗿 ANCIENT GOLEM AWAKENS!           ║\n╚══════════════════════════════════════════╝\n\nThe ground shakes as a towering construct of ancient stone\nrises before you. Glowing runes pulse across its body.\n\n"MORTAL... PROVE YOUR WORTH... OR BE CRUSHED..."\n\nHP: ${enemy.hp}  ATK: ${enemy.atk}  DEF: ${enemy.def}\nWeakness: ${enemy.weakness.join(", ")}\n`,
+    1: `======================================
+  SLIME KING APPEARS!
+======================================
+
+A wobbling mass of green slime wearing a tiny golden crown
+slides into the arena. It jiggles menacingly at you.
+
+"Hah! Another challenger? I'll absorb you in seconds!"
+
+HP: ${enemy.hp}  ATK: ${enemy.atk}  DEF: ${enemy.def}
+Weakness: ${enemy.weakness.join(", ")}
+`,
+    2: `======================================
+  SHADOW WOLF STALKS YOU!
+======================================
+
+Red eyes glow from the darkness as a wolf made of living
+shadow phases into existence. It circles you silently.
+
+*The air grows cold. You hear nothing but your own heartbeat.*
+
+HP: ${enemy.hp}  ATK: ${enemy.atk}  DEF: ${enemy.def}
+Weakness: ${enemy.weakness.join(", ")}
+`,
+    3: `======================================
+  ANCIENT GOLEM AWAKENS!
+======================================
+
+The ground shakes as a towering construct of ancient stone
+rises before you. Glowing runes pulse across its body.
+
+"MORTAL... PROVE YOUR WORTH... OR BE CRUSHED..."
+
+HP: ${enemy.hp}  ATK: ${enemy.atk}  DEF: ${enemy.def}
+Weakness: ${enemy.weakness.join(", ")}
+`,
   };
   return intros[enemy.id] ?? `A wild ${enemy.name} appears!`;
 }
