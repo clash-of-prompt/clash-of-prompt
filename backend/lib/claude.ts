@@ -50,7 +50,7 @@ export async function getAIBattleTurn(
 Respond with ONLY the JSON object. Nothing else.`;
 
   // Write prompt to temp file, pipe to claude CLI
-  const tmpFile = join(tmpdir(), `prompt-wars-${Date.now()}.txt`);
+  const tmpFile = join(tmpdir(), `clash-of-prompt-${Date.now()}.txt`);
   await writeFile(tmpFile, fullPrompt, "utf-8");
 
   let stdout: string;

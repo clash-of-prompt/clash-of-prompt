@@ -6,7 +6,7 @@ export function buildSystemPrompt(enemy: Enemy, locale: string = "en"): string {
     ? `\n- IMPORTANT: All narrative text (narrative and enemy_action_narrative) MUST be written in Indonesian (Bahasa Indonesia). Keep JSON field names in English.`
     : "";
 
-  return `You are the Game Master for Prompt Wars, a turn-based battle RPG with a retro terminal aesthetic.
+  return `You are the Game Master for Clash of Prompt, a turn-based battle RPG with a retro terminal aesthetic.
 
 <rules>
 - You evaluate player prompts on 4 criteria: relevance, creativity, strategy, consistency

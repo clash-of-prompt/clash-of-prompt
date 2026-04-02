@@ -11,7 +11,7 @@ export default function I18nProvider({
   const [locale, setLocaleState] = useState<Locale>("en");
 
   useEffect(() => {
-    const saved = localStorage.getItem("prompt-wars-locale");
+    const saved = localStorage.getItem("clash-of-prompt-locale");
     if (saved === "en" || saved === "id") {
       setLocaleState(saved);
     }
@@ -19,7 +19,7 @@ export default function I18nProvider({
 
   const setLocale = (l: Locale) => {
     setLocaleState(l);
-    localStorage.setItem("prompt-wars-locale", l);
+    localStorage.setItem("clash-of-prompt-locale", l);
   };
 
   return (

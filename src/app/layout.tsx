@@ -3,7 +3,7 @@ import "./globals.css";
 import I18nProvider from "@/components/I18nProvider";
 
 export const metadata: Metadata = {
-  title: "Prompt Wars - AI Battle Arena",
+  title: "Clash of Prompt - AI Battle Arena",
   description:
     "Turn-based battle game where your creativity is your weapon. Fight monsters using natural language prompts.",
 };

@@ -209,5 +209,5 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`Prompt Wars backend running on port ${PORT}`);
+  console.log(`Clash of Prompt backend running on port ${PORT}`);
 });

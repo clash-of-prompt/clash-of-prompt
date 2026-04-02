@@ -1,4 +1,4 @@
-# Prompt Wars - AI Battle Arena
+# Clash of Prompt - AI Battle Arena
 
 A turn-based battle RPG where your creativity is your weapon. Write prompts to attack enemies, and an AI Game Master narrates the battle, scores your creativity, and determines damage.
 
@@ -7,7 +7,7 @@ A turn-based battle RPG where your creativity is your weapon. Write prompts to a
 Split into two services:
 
 ```
-prompt-wars/
+clash-of-prompt/
 ├── src/                    Frontend (Vercel)
 │   ├── app/api/            Thin proxies to backend
 │   ├── components/         React UI components
@@ -46,11 +46,11 @@ prompt-wars/
 ```bash
 # Terminal 1: Backend (Docker)
 cd backend
-docker build -t prompt-wars-backend .
+docker build -t clash-of-prompt-backend .
 docker run -p 8080:8080 \
   -e CLAUDE_CODE_OAUTH_TOKEN=your-token \
   -e GEMINI_API_KEY=your-key \
-  prompt-wars-backend
+  clash-of-prompt-backend
 
 # Terminal 2: Frontend
 npm install
