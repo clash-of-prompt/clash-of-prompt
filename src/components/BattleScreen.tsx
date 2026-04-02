@@ -55,8 +55,14 @@ const EFFECT_ICONS: Record<string, string> = {
   poison: "☠", stun: "⚡", shield: "🛡", heal: "❤", burn: "🔥",
 };
 
+const ENEMY_IMAGES: Record<number, string> = {
+  1: "/enemies/slime-king.png",
+  2: "/enemies/shadow-wolf.png",
+  3: "/enemies/ancient-golem.png",
+};
+
 export default function BattleScreen({
-  battleId, enemyName, enemyDescription, intro, initialBattle, onBattleEnd,
+  battleId, enemyId, enemyName, enemyDescription, intro, initialBattle, onBattleEnd,
 }: BattleScreenProps) {
   const { t, locale } = useI18n();
   const [battle, setBattle] = useState<BattleState>(initialBattle);
@@ -183,7 +189,12 @@ export default function BattleScreen({
         <div className="flex justify-between items-center mb-2">
           <span className="text-cyan glow-cyan">{t.you}</span>
           <span className="text-dim text-sm">{t.turn_label} {battle.turn}/{battle.maxTurns}</span>
-          <span className="text-red glow-red">{enemyName}</span>
+          <span className="text-red glow-red flex items-center gap-2">
+            {ENEMY_IMAGES[enemyId] && (
+              <img src={ENEMY_IMAGES[enemyId]} alt={enemyName} className="w-8 h-8 rounded object-cover border border-gray-700" style={{ imageRendering: "pixelated" }} />
+            )}
+            {enemyName}
+          </span>
         </div>
         <HpBar current={battle.playerHp} max={100} label={t.player_label} color="player" />
         <HpBar current={battle.enemyHp} max={battle.enemyMaxHp} label={enemyName.toUpperCase()} color="enemy" />

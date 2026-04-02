@@ -41,6 +41,12 @@ const DIFFICULTY_COLORS: Record<string, string> = {
   boss: "text-red glow-red",
 };
 
+const ENEMY_IMAGES: Record<number, string> = {
+  1: "/enemies/slime-king.png",
+  2: "/enemies/shadow-wolf.png",
+  3: "/enemies/ancient-golem.png",
+};
+
 export default function EnemySelect({ onSelect, onBack }: EnemySelectProps) {
   const { t, locale } = useI18n();
   const [enemies, setEnemies] = useState<EnemyInfo[]>([]);
@@ -102,20 +108,32 @@ export default function EnemySelect({ onSelect, onBack }: EnemySelectProps) {
         {enemies.map((enemy) => (
           <button key={enemy.id} onClick={() => setSelected(enemy.id)}
             className={`terminal-btn w-full text-left p-4 ${selected === enemy.id ? "selected" : ""}`}>
-            <div className="flex justify-between items-start">
-              <div>
-                <span className="text-white text-lg">{enemy.name}</span>
-                <span className={`ml-3 text-sm ${DIFFICULTY_COLORS[enemy.difficulty]}`}>
-                  [{DIFFICULTY_LABELS[enemy.difficulty]}]
-                </span>
+            <div className="flex gap-4 items-start">
+              {ENEMY_IMAGES[enemy.id] && (
+                <img
+                  src={ENEMY_IMAGES[enemy.id]}
+                  alt={enemy.name}
+                  className="w-20 h-20 rounded object-cover border border-gray-700 flex-shrink-0"
+                  style={{ imageRendering: "pixelated" }}
+                />
+              )}
+              <div className="flex-1">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <span className="text-white text-lg">{enemy.name}</span>
+                    <span className={`ml-3 text-sm ${DIFFICULTY_COLORS[enemy.difficulty]}`}>
+                      [{DIFFICULTY_LABELS[enemy.difficulty]}]
+                    </span>
+                  </div>
+                </div>
+                <p className="text-dim text-sm mt-1">{t.enemy_descs[enemy.id] || enemy.description}</p>
+                <div className="flex gap-6 mt-2 text-sm">
+                  <span className="text-red">HP:{enemy.hp}</span>
+                  <span className="text-amber">ATK:{enemy.atk}</span>
+                  <span className="text-cyan">DEF:{enemy.def}</span>
+                  <span className="text-magenta">{t.weak_label}: {enemy.weakness.map((w) => t.enemy_weakness[w] || w).join(", ")}</span>
+                </div>
               </div>
-            </div>
-            <p className="text-dim text-sm mt-1">{t.enemy_descs[enemy.id] || enemy.description}</p>
-            <div className="flex gap-6 mt-2 text-sm">
-              <span className="text-red">HP:{enemy.hp}</span>
-              <span className="text-amber">ATK:{enemy.atk}</span>
-              <span className="text-cyan">DEF:{enemy.def}</span>
-              <span className="text-magenta">{t.weak_label}: {enemy.weakness.map((w) => t.enemy_weakness[w] || w).join(", ")}</span>
             </div>
           </button>
         ))}
