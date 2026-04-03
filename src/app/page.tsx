@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import TitleScreen from "@/components/TitleScreen";
+import ModeSelect from "@/components/ModeSelect";
 import EnemySelect from "@/components/EnemySelect";
 import BattleScreen from "@/components/BattleScreen";
 import BattleEndScreen from "@/components/BattleEndScreen";
 
-type GamePhase = "title" | "select" | "battle" | "end";
+type GamePhase = "title" | "mode" | "select" | "battle" | "end";
 
 interface BattleData {
   id: string;
@@ -38,7 +39,16 @@ export default function Home() {
   const [battleData, setBattleData] = useState<BattleData | null>(null);
   const [battleResult, setBattleResult] = useState<BattleResult | null>(null);
 
-  const handleStart = () => setPhase("select");
+  const handleStart = () => setPhase("mode");
+
+  const handleSelectMode = (mode: "pve" | "pvp") => {
+    if (mode === "pve") {
+      setPhase("select");
+    } else {
+      // PVP lobby - for now go to select as placeholder
+      setPhase("select");
+    }
+  };
 
   const handleSelectEnemy = (data: BattleData) => {
     setBattleData(data);
@@ -66,6 +76,12 @@ export default function Home() {
     <main className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-3xl">
         {phase === "title" && <TitleScreen onStart={handleStart} />}
+        {phase === "mode" && (
+          <ModeSelect
+            onSelectMode={handleSelectMode}
+            onBack={handleBackToTitle}
+          />
+        )}
         {phase === "select" && (
           <EnemySelect
             onSelect={handleSelectEnemy}

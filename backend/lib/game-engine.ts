@@ -38,6 +38,7 @@ export interface BattleState {
   score: number;
   createdAt: number;
   lastActionAt: number;
+  walletAddress?: string;
 }
 
 export interface TurnRecord {

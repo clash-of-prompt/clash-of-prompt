@@ -11,6 +11,12 @@ import { getAIBattleTurn, generateBattleIntro } from "./lib/claude.js";
 import { generateBattleImage } from "./lib/gemini.js";
 import { buildImagePrompt } from "./lib/image-prompt.js";
 import { ENEMIES, getEnemyById } from "./lib/enemies.js";
+import {
+  recordScore,
+  mintClashToken,
+  mintVictoryNft,
+  calculateTokenReward,
+} from "./lib/chain.js";
 
 const PORT = parseInt(process.env.PORT || "8080", 10);
 
@@ -123,7 +129,7 @@ const server = http.createServer(async (req, res) => {
     // POST /api/battle/turn
     if (path === "/api/battle/turn" && req.method === "POST") {
       const body = JSON.parse(await readBody(req));
-      const { battleId, prompt, locale } = body;
+      const { battleId, prompt, locale, walletAddress } = body;
 
       if (!battleId || typeof battleId !== "string") {
         return json(res, { error: "battleId is required" }, 400);
@@ -145,6 +151,11 @@ const server = http.createServer(async (req, res) => {
         return json(res, { error: `Battle is already ${battle.status}` }, 400);
       }
 
+      // Store wallet address if provided
+      if (walletAddress && typeof walletAddress === "string") {
+        battle.walletAddress = walletAddress;
+      }
+
       // Rate limit
       const lastTime = lastTurnTime.get(battleId) ?? 0;
       const now = Date.now();
@@ -161,6 +172,48 @@ const server = http.createServer(async (req, res) => {
       }
 
       const lastTurn = updatedBattle.turnHistory[updatedBattle.turnHistory.length - 1];
+
+      // Chain integration on victory
+      let chain: { txHash: string | null; tokensEarned: number } | undefined;
+      if (updatedBattle.status === "victory" && updatedBattle.walletAddress) {
+        const avgCreativity =
+          updatedBattle.turnHistory.reduce((sum, t) => sum + t.creativityScore, 0) /
+          updatedBattle.turnHistory.length;
+
+        const tokensEarned = calculateTokenReward(
+          updatedBattle.score,
+          updatedBattle.turn,
+          GAME_RULES.MAX_TURNS,
+          avgCreativity
+        );
+
+        // Fire chain calls in parallel, don't block response on failure
+        const [scoreTx, mintTx, nftTx] = await Promise.all([
+          recordScore(
+            updatedBattle.walletAddress,
+            updatedBattle.enemyId,
+            updatedBattle.score,
+            updatedBattle.turn,
+            avgCreativity,
+            false
+          ),
+          mintClashToken(updatedBattle.walletAddress, tokensEarned),
+          mintVictoryNft(
+            updatedBattle.walletAddress,
+            updatedBattle.enemy.name,
+            updatedBattle.score,
+            updatedBattle.turn,
+            avgCreativity,
+            "" // imageUrl filled by client later or empty
+          ),
+        ]);
+
+        chain = {
+          txHash: scoreTx || mintTx || nftTx || null,
+          tokensEarned,
+        };
+      }
+
       return json(res, {
         battle: getBattleSummary(updatedBattle),
         turn: {
@@ -173,6 +226,7 @@ const server = http.createServer(async (req, res) => {
           playerEffect: lastTurn.playerEffect,
           enemyEffect: lastTurn.enemyEffect,
         },
+        ...(chain ? { chain } : {}),
       });
     }
 
