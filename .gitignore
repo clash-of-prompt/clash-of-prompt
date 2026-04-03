@@ -50,3 +50,8 @@ next-env.d.ts
 /video/node_modules
 /video/out
 /video/.cache
+
+# initia keys & local config (NEVER commit)
+initia-keys.md
+setup-commands.md
+.weave/

@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@google/genai": "^1.46.0",
+    "@initia/initia.js": "^0.2.6",
     "zod": "^4.3.6"
   },
   "devDependencies": {

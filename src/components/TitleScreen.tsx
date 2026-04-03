@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useI18n } from "@/lib/i18n";
 import LanguageSwitcher from "./LanguageSwitcher";
+import WalletButton from "./WalletButton";
 
 interface TitleScreenProps {
   onStart: () => void;
@@ -34,7 +35,8 @@ export default function TitleScreen({ onStart }: TitleScreenProps) {
 
   return (
     <div className="text-center fade-in">
-      <div className="flex justify-end mb-2">
+      <div className="flex justify-end items-center gap-3 mb-2">
+        <WalletButton />
         <LanguageSwitcher />
       </div>
 

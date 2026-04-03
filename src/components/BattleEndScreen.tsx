@@ -1,6 +1,8 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useI18n } from "@/lib/i18n";
+import { useWallet } from "@/lib/wallet";
 
 interface BattleEndScreenProps {
   result: { status: "victory" | "defeat" | "timeout"; score: number; turns: number; enemyName: string };
@@ -10,6 +12,9 @@ interface BattleEndScreenProps {
 
 export default function BattleEndScreen({ result, onPlayAgain, onBackToTitle }: BattleEndScreenProps) {
   const { t } = useI18n();
+  const { connected } = useWallet();
+  const router = useRouter();
+  const clashEarned = result.status === "victory" ? Math.floor(result.score / 10) : Math.floor(result.score / 50);
 
   const artText = result.status === "victory" ? t.victory : result.status === "defeat" ? t.defeat : t.timeout;
   const art = `\n╔═══════════════════════════════════╗\n║         ${artText}        ║\n╚═══════════════════════════════════╝`;
@@ -36,8 +41,25 @@ export default function BattleEndScreen({ result, onPlayAgain, onBackToTitle }: 
           </div>
         </div>
       </div>
-      <div className="flex gap-4 justify-center">
+      <div className="border border-[var(--green-dim)] p-4 mb-6 max-w-sm mx-auto">
+        {connected ? (
+          <div className="space-y-2 text-center">
+            <p className="text-green glow-green">{t.score_on_chain} ✓</p>
+            <p className="text-green glow-green text-lg" style={{ textShadow: "0 0 10px var(--green), 0 0 20px var(--green)" }}>
+              {t.clash_earned(clashEarned)}
+            </p>
+            {result.status === "victory" && (
+              <p className="text-amber glow-amber">{t.nft_minted}</p>
+            )}
+          </div>
+        ) : (
+          <p className="text-dim text-center">{t.connect_to_save}</p>
+        )}
+      </div>
+
+      <div className="flex gap-4 justify-center flex-wrap">
         <button onClick={onPlayAgain} className="terminal-btn text-green glow-green">{t.fight_again}</button>
+        <button onClick={() => router.push("/leaderboard")} className="terminal-btn text-cyan glow-cyan">{t.view_leaderboard}</button>
         <button onClick={onBackToTitle} className="terminal-btn text-dim">{t.main_menu}</button>
       </div>
     </div>

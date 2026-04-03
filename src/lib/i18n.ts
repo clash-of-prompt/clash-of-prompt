@@ -109,6 +109,32 @@ export const translations = {
     intro_golem_dialogue: '"MORTAL... PROVE YOUR WORTH... OR BE CRUSHED..."',
     weakness_label: "Weakness",
 
+    // Mode select
+    mode_select_title: "> SELECT GAME MODE",
+    mode_pve: "SOLO PVE",
+    mode_pvp: "PVP ARENA",
+    mode_coop: "CO-OP",
+    mode_direct_pvp: "DIRECT PVP",
+    coming_soon: "SOON",
+
+    // Wallet
+    connect_wallet: "Connect Wallet",
+    disconnect: "Disconnect",
+    clash_balance: "CLASH Balance",
+
+    // On-chain results
+    score_on_chain: "Score recorded on-chain",
+    connect_to_save: "Connect wallet to save scores",
+    clash_earned: (amount: number) => `+${amount} CLASH earned!`,
+    nft_minted: "Victory NFT minted!",
+    view_leaderboard: "> VIEW LEADERBOARD",
+
+    // Leaderboard
+    leaderboard_title: "> LEADERBOARD",
+    leaderboard_empty: "No scores recorded yet.",
+    rank: "RANK",
+    address: "ADDRESS",
+
     // Language
     language: "Language",
   },
@@ -217,6 +243,32 @@ export const translations = {
     intro_wolf_dialogue: "*Udara menjadi dingin. Kau hanya mendengar detak jantungmu sendiri.*",
     intro_golem_dialogue: '"MANUSIA FANA... BUKTIKAN KELAYAKANMU... ATAU HANCUR LEBUR..."',
     weakness_label: "Kelemahan",
+
+    // Mode select
+    mode_select_title: "> PILIH MODE PERMAINAN",
+    mode_pve: "SOLO PVE",
+    mode_pvp: "ARENA PVP",
+    mode_coop: "CO-OP",
+    mode_direct_pvp: "PVP LANGSUNG",
+    coming_soon: "SEGERA",
+
+    // Wallet
+    connect_wallet: "Hubungkan Wallet",
+    disconnect: "Putuskan",
+    clash_balance: "Saldo CLASH",
+
+    // On-chain results
+    score_on_chain: "Skor tercatat on-chain",
+    connect_to_save: "Hubungkan wallet untuk menyimpan skor",
+    clash_earned: (amount: number) => `+${amount} CLASH diperoleh!`,
+    nft_minted: "NFT Kemenangan dicetak!",
+    view_leaderboard: "> LIHAT PAPAN PERINGKAT",
+
+    // Leaderboard
+    leaderboard_title: "> PAPAN PERINGKAT",
+    leaderboard_empty: "Belum ada skor tercatat.",
+    rank: "PERINGKAT",
+    address: "ALAMAT",
 
     // Language
     language: "Bahasa",
