@@ -2,8 +2,7 @@ module clash_of_prompt::game_arena {
     use std::signer;
     use std::vector;
     use initia_std::block;
-    use initia_std::fungible_asset;
-    use clash_of_prompt::clash_token;
+    use initia_std::simple_map::{Self, SimpleMap};
 
     /// Only the module publisher can call this function.
     const ENOT_ADMIN: u64 = 1;
@@ -53,12 +52,63 @@ module clash_of_prompt::game_arena {
         next_id: u64,
     }
 
+    // CLASH token balance tracker (simple on-chain ledger)
+    struct ClashBalances has key {
+        balances: SimpleMap<address, u64>,
+        total_minted: u64,
+    }
+
     fun init_module(admin: &signer) {
         move_to(admin, Leaderboard { entries: vector::empty() });
         move_to(admin, PvPState { lobbies: vector::empty(), next_id: 0 });
+        move_to(admin, ClashBalances {
+            balances: simple_map::new(),
+            total_minted: 0,
+        });
     }
 
-    // --- Leaderboard ------------------------------------------------------
+    /// Initialize ClashBalances if not yet created (for module upgrades).
+    public entry fun init_clash_balances(admin: &signer) {
+        assert!(signer::address_of(admin) == @clash_of_prompt, ENOT_ADMIN);
+        if (!exists<ClashBalances>(@clash_of_prompt)) {
+            move_to(admin, ClashBalances {
+                balances: simple_map::new(),
+                total_minted: 0,
+            });
+        };
+    }
+
+    // --- CLASH Balance Tracking -----------------------------------------------
+
+    /// Reward CLASH tokens to a player (admin only).
+    public entry fun reward_clash(
+        admin: &signer,
+        player: address,
+        amount: u64,
+    ) acquires ClashBalances {
+        assert!(signer::address_of(admin) == @clash_of_prompt, ENOT_ADMIN);
+
+        let cb = borrow_global_mut<ClashBalances>(@clash_of_prompt);
+        if (simple_map::contains_key(&cb.balances, &player)) {
+            let current = simple_map::borrow_mut(&mut cb.balances, &player);
+            *current = *current + amount;
+        } else {
+            simple_map::add(&mut cb.balances, player, amount);
+        };
+        cb.total_minted = cb.total_minted + amount;
+    }
+
+    #[view]
+    public fun get_clash_balance(player: address): u64 acquires ClashBalances {
+        let cb = borrow_global<ClashBalances>(@clash_of_prompt);
+        if (simple_map::contains_key(&cb.balances, &player)) {
+            *simple_map::borrow(&cb.balances, &player)
+        } else {
+            0
+        }
+    }
+
+    // --- Leaderboard ----------------------------------------------------------
 
     /// Record a score to the leaderboard (admin only). Keeps top 100 sorted desc.
     public entry fun record_score(
@@ -107,20 +157,21 @@ module clash_of_prompt::game_arena {
         lb.entries
     }
 
-    // --- PvP Lobbies ------------------------------------------------------
+    // --- PvP Lobbies ----------------------------------------------------------
 
     /// Create a new PvP lobby and lock the wager.
     public entry fun create_lobby(
         creator: &signer,
         enemy_id: u64,
         wager: u64,
-    ) acquires PvPState {
+    ) acquires PvPState, ClashBalances {
         let creator_addr = signer::address_of(creator);
 
-        // Lock wager tokens from creator
-        let fa = clash_token::withdraw_with_ref(creator_addr, wager);
-        // Deposit to module account as escrow
-        clash_token::deposit_with_ref(@clash_of_prompt, fa);
+        // Deduct wager from creator balance
+        let cb = borrow_global_mut<ClashBalances>(@clash_of_prompt);
+        let bal = simple_map::borrow_mut(&mut cb.balances, &creator_addr);
+        assert!(*bal >= wager, EINVALID_STATUS);
+        *bal = *bal - wager;
 
         let state = borrow_global_mut<PvPState>(@clash_of_prompt);
         let lobby = PvPLobby {
@@ -141,7 +192,7 @@ module clash_of_prompt::game_arena {
     public entry fun join_lobby(
         opponent: &signer,
         lobby_id: u64,
-    ) acquires PvPState {
+    ) acquires PvPState, ClashBalances {
         let opponent_addr = signer::address_of(opponent);
         let state = borrow_global_mut<PvPState>(@clash_of_prompt);
         let lobby = find_lobby_mut(&mut state.lobbies, lobby_id);
@@ -149,9 +200,11 @@ module clash_of_prompt::game_arena {
         assert!(lobby.status == STATUS_OPEN, EINVALID_STATUS);
         assert!(opponent_addr != lobby.creator, ECANNOT_JOIN_OWN);
 
-        // Lock matching wager
-        let fa = clash_token::withdraw_with_ref(opponent_addr, lobby.wager);
-        clash_token::deposit_with_ref(@clash_of_prompt, fa);
+        // Deduct wager from opponent balance
+        let cb = borrow_global_mut<ClashBalances>(@clash_of_prompt);
+        let bal = simple_map::borrow_mut(&mut cb.balances, &opponent_addr);
+        assert!(*bal >= lobby.wager, EINVALID_STATUS);
+        *bal = *bal - lobby.wager;
 
         lobby.opponent = opponent_addr;
         lobby.status = STATUS_JOINED;
@@ -181,7 +234,7 @@ module clash_of_prompt::game_arena {
     public entry fun settle(
         admin: &signer,
         lobby_id: u64,
-    ) acquires PvPState {
+    ) acquires PvPState, ClashBalances {
         assert!(signer::address_of(admin) == @clash_of_prompt, ENOT_ADMIN);
 
         let state = borrow_global_mut<PvPState>(@clash_of_prompt);
@@ -191,7 +244,7 @@ module clash_of_prompt::game_arena {
 
         let total_pot = lobby.wager * 2;
         let burn_amount = total_pot / 20; // 5%
-        let _payout = total_pot - burn_amount;
+        let payout = total_pot - burn_amount;
 
         // Determine winner (creator wins ties)
         let winner = if (lobby.creator_score >= lobby.opponent_score) {
@@ -200,18 +253,19 @@ module clash_of_prompt::game_arena {
             lobby.opponent
         };
 
-        // Withdraw pot from escrow (module account)
-        let pot_fa = clash_token::withdraw_with_ref(@clash_of_prompt, total_pot);
-
-        // Split: burn 5%, send rest to winner
-        let burn_fa = fungible_asset::extract(&mut pot_fa, burn_amount);
-        clash_token::burn_fa(burn_fa);
-        clash_token::deposit_with_ref(winner, pot_fa);
+        // Pay winner
+        let cb = borrow_global_mut<ClashBalances>(@clash_of_prompt);
+        if (simple_map::contains_key(&cb.balances, &winner)) {
+            let bal = simple_map::borrow_mut(&mut cb.balances, &winner);
+            *bal = *bal + payout;
+        } else {
+            simple_map::add(&mut cb.balances, winner, payout);
+        };
 
         lobby.status = STATUS_SETTLED;
     }
 
-    // --- Helpers -----------------------------------------------------------
+    // --- Helpers ---------------------------------------------------------------
 
     fun find_lobby_mut(lobbies: &mut vector<PvPLobby>, lobby_id: u64): &mut PvPLobby {
         let len = vector::length(lobbies);

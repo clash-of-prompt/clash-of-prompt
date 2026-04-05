@@ -41,6 +41,7 @@ async function execMove(
     "--gas-adjustment 1.5",
     "--yes",
     "--output json",
+    "2>&1",
   ].join(" ");
 
   try {
@@ -73,8 +74,23 @@ async function execMove(
     }
     return txhash;
   } catch (error: any) {
-    console.error(`[Chain] ${moduleName}::${functionName} failed:`, error?.message || error);
-    if (error?.stderr) console.error(`[Chain] stderr: ${error.stderr}`);
+    // initiad outputs "gas estimate: NNN" to stderr which makes exec think it failed
+    // Check if stdout still has valid JSON
+    if (error?.stdout) {
+      const jsonMatch = error.stdout.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          const result = JSON.parse(jsonMatch[0]);
+          if (result.txhash && result.code === 0) {
+            console.log(`[Chain] ${moduleName}::${functionName} tx (from stderr path): ${result.txhash}`);
+            return result.txhash;
+          }
+        } catch {}
+      }
+      console.error(`[Chain] ${moduleName}::${functionName} stdout: ${error.stdout.slice(0, 300)}`);
+    }
+    console.error(`[Chain] ${moduleName}::${functionName} failed:`, error?.message?.slice(0, 200) || error);
+    if (error?.stderr) console.error(`[Chain] stderr: ${error.stderr.slice(0, 300)}`);
     return null;
   }
 }
@@ -103,9 +119,10 @@ export async function mintClashToken(
   toAddress: string,
   amount: number
 ): Promise<string | null> {
-  return execMove("clash_token", "mint", [
+  // Use game_arena::reward_clash instead of clash_token::mint
+  return execMove("game_arena", "reward_clash", [
     `address:${toAddress}`,
-    `u64:${amount * 1000000}`,
+    `u64:${amount}`,
   ]);
 }
 
