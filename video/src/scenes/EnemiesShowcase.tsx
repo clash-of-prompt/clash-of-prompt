@@ -1,212 +1,109 @@
-import { AbsoluteFill, useCurrentFrame, interpolate, spring, useVideoConfig } from "remotion";
+import { AbsoluteFill, useCurrentFrame, interpolate, spring, useVideoConfig, Img, staticFile } from "remotion";
 
 const enemies = [
-  {
-    emoji: "👑",
-    name: "SLIME KING",
-    hp: 80,
-    atk: 8,
-    def: 3,
-    weakness: "Fire, Piercing",
-    difficulty: "EASY",
-    diffColor: "#00ff41",
-    desc: "Cocky and overconfident",
-    personality: '"I\'ll absorb you in seconds!"',
-  },
-  {
-    emoji: "🐺",
-    name: "SHADOW WOLF",
-    hp: 120,
-    atk: 15,
-    def: 8,
-    weakness: "Light, Loud Noises",
-    difficulty: "MEDIUM",
-    diffColor: "#ffaa00",
-    desc: "Cunning and strategic",
-    personality: "*Silent. Deadly.*",
-  },
-  {
-    emoji: "🗿",
-    name: "ANCIENT GOLEM",
-    hp: 160,
-    atk: 20,
-    def: 15,
-    weakness: "Water, Joint Strikes",
-    difficulty: "BOSS",
-    diffColor: "#ff3333",
-    desc: "Honorable warrior",
-    personality: '"PROVE YOUR WORTH..."',
-  },
+  { name: "SLIME KING", image: "slime-king.png", hp: 80, atk: 8, def: 3, weakness: "Fire, Piercing", diff: "EASY", color: "#00ff41" },
+  { name: "SHADOW WOLF", image: "shadow-wolf.png", hp: 120, atk: 15, def: 8, weakness: "Light, Loud Noises", diff: "MEDIUM", color: "#ffaa00" },
+  { name: "ANCIENT GOLEM", image: "ancient-golem.png", hp: 160, atk: 20, def: 15, weakness: "Water, Joint Strikes", diff: "BOSS", color: "#ff3333" },
 ];
 
 export const EnemiesShowcase = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
+  // Title
+  const titleOp = interpolate(frame, [0, 15], [0, 1], { extrapolateRight: "clamp" });
+
+  // Exit
+  const exitFade = interpolate(frame, [420, 450], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+
   return (
-    <AbsoluteFill
-      style={{
-        backgroundColor: "#0a0a14",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 60,
-      }}
-    >
+    <AbsoluteFill style={{ backgroundColor: "#050510", opacity: exitFade }}>
       {/* Title */}
-      <div
-        style={{
-          fontSize: 52,
-          fontFamily: "'Courier New', monospace",
-          fontWeight: 900,
-          color: "#ff3333",
-          marginBottom: 60,
-          textShadow: "0 0 20px #ff333340",
-          opacity: interpolate(frame, [0, 15], [0, 1], { extrapolateRight: "clamp" }),
-        }}
-      >
-        {"// CHOOSE YOUR ENEMY"}
+      <div style={{
+        position: "absolute", top: 50, left: "50%", transform: "translateX(-50%)",
+        opacity: titleOp, textAlign: "center",
+      }}>
+        <div style={{ fontSize: 20, color: "#ff3333", fontFamily: "'Courier New', monospace", letterSpacing: 8, marginBottom: 8 }}>
+          CHOOSE YOUR ENEMY
+        </div>
+        <div style={{ fontSize: 52, color: "#ffffff", fontFamily: "'Courier New', monospace", fontWeight: 900, textShadow: "0 0 20px rgba(255,255,255,0.2)" }}>
+          THREE DEADLY FOES
+        </div>
       </div>
 
       {/* Enemy cards */}
-      <div style={{ display: "flex", gap: 50 }}>
+      <div style={{
+        position: "absolute", top: 180, left: 0, right: 0,
+        display: "flex", justifyContent: "center", gap: 40, padding: "0 60px",
+      }}>
         {enemies.map((enemy, i) => {
-          const cardScale = spring({
-            frame,
-            fps,
-            config: { damping: 10, stiffness: 100 },
-            delay: 30 + i * 40,
-          });
+          const delay = 30 + i * 50;
+          const cardY = spring({ frame, fps, config: { damping: 10, stiffness: 80 }, delay });
+          const slideY = interpolate(cardY, [0, 1], [60, 0]);
 
-          const isHovered = frame >= 200 + i * 80 && frame < 260 + i * 80;
-          const hoverGlow = isHovered ? 0.15 : 0.04;
+          // Highlight animation
+          const highlightStart = 200 + i * 70;
+          const isHighlighted = frame >= highlightStart && frame < highlightStart + 50;
+          const highlightGlow = isHighlighted ? interpolate(frame, [highlightStart, highlightStart + 10, highlightStart + 40, highlightStart + 50], [0, 1, 1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) : 0;
 
           return (
-            <div
-              key={i}
-              style={{
-                width: 480,
-                padding: 40,
-                backgroundColor: `rgba(${enemy.diffColor === "#00ff41" ? "0,255,65" : enemy.diffColor === "#ffaa00" ? "255,170,0" : "255,51,51"}, ${hoverGlow})`,
-                border: `2px solid ${enemy.diffColor}40`,
-                borderRadius: 4,
-                transform: `scale(${cardScale}) ${isHovered ? "translateY(-10px)" : ""}`,
-                opacity: cardScale,
-                transition: "transform 0.1s",
-              }}
-            >
-              {/* Difficulty badge */}
-              <div
-                style={{
-                  fontSize: 14,
-                  fontFamily: "'Courier New', monospace",
-                  color: enemy.diffColor,
-                  letterSpacing: 3,
-                  marginBottom: 15,
-                  fontWeight: 900,
-                }}
-              >
-                [{enemy.difficulty}]
+            <div key={i} style={{
+              width: 480, opacity: cardY, transform: `translateY(${slideY}px)`,
+              background: `rgba(${enemy.color === "#00ff41" ? "0,255,65" : enemy.color === "#ffaa00" ? "255,170,0" : "255,51,51"},${0.03 + highlightGlow * 0.08})`,
+              border: `2px solid ${enemy.color}${highlightGlow > 0 ? "80" : "30"}`,
+              borderRadius: 6, overflow: "hidden",
+              boxShadow: highlightGlow > 0 ? `0 0 30px ${enemy.color}40` : "none",
+            }}>
+              {/* Enemy portrait */}
+              <div style={{ width: "100%", height: 320, overflow: "hidden", borderBottom: `2px solid ${enemy.color}30` }}>
+                <Img src={staticFile(`assets/${enemy.image}`)} style={{
+                  width: "100%", height: "100%", objectFit: "cover",
+                  imageRendering: "pixelated",
+                  transform: `scale(${1 + highlightGlow * 0.05})`,
+                }} />
               </div>
 
-              {/* Emoji */}
-              <div style={{ fontSize: 70, marginBottom: 15 }}>{enemy.emoji}</div>
+              {/* Info */}
+              <div style={{ padding: "20px 24px" }}>
+                {/* Difficulty badge */}
+                <div style={{
+                  display: "inline-block", padding: "3px 12px", marginBottom: 10,
+                  background: `${enemy.color}20`, border: `1px solid ${enemy.color}60`,
+                  borderRadius: 3, fontSize: 13, fontFamily: "'Courier New', monospace",
+                  color: enemy.color, fontWeight: 900, letterSpacing: 2,
+                }}>
+                  {enemy.diff}
+                </div>
 
-              {/* Name */}
-              <div
-                style={{
-                  fontSize: 30,
-                  fontFamily: "'Courier New', monospace",
-                  fontWeight: 900,
-                  color: "#ffffff",
-                  marginBottom: 10,
-                }}
-              >
-                {enemy.name}
-              </div>
+                {/* Name */}
+                <div style={{
+                  fontSize: 28, fontFamily: "'Courier New', monospace", fontWeight: 900,
+                  color: "#ffffff", marginBottom: 14,
+                }}>
+                  {enemy.name}
+                </div>
 
-              {/* Description */}
-              <div
-                style={{
-                  fontSize: 18,
-                  fontFamily: "'Courier New', monospace",
-                  color: "#888",
-                  marginBottom: 20,
-                  fontStyle: "italic",
-                }}
-              >
-                {enemy.desc}
-              </div>
-
-              {/* Stats */}
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr 1fr",
-                  gap: 10,
-                  marginBottom: 15,
-                }}
-              >
-                {[
-                  { label: "HP", value: enemy.hp },
-                  { label: "ATK", value: enemy.atk },
-                  { label: "DEF", value: enemy.def },
-                ].map((stat) => (
-                  <div
-                    key={stat.label}
-                    style={{
-                      textAlign: "center",
-                      padding: "8px 0",
-                      backgroundColor: "#0a0a14",
-                      borderRadius: 2,
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontSize: 12,
-                        color: "#666",
-                        fontFamily: "'Courier New', monospace",
-                      }}
-                    >
-                      {stat.label}
+                {/* Stats row */}
+                <div style={{ display: "flex", gap: 16, marginBottom: 12 }}>
+                  {[
+                    { label: "HP", value: enemy.hp, c: "#ff3333" },
+                    { label: "ATK", value: enemy.atk, c: "#ff6b35" },
+                    { label: "DEF", value: enemy.def, c: "#4488ff" },
+                  ].map((s) => (
+                    <div key={s.label} style={{
+                      flex: 1, textAlign: "center", padding: "8px 0",
+                      background: "rgba(0,0,0,0.4)", borderRadius: 3,
+                    }}>
+                      <div style={{ fontSize: 11, color: "#666", fontFamily: "'Courier New', monospace", letterSpacing: 2 }}>{s.label}</div>
+                      <div style={{ fontSize: 22, color: s.c, fontWeight: 900, fontFamily: "'Courier New', monospace" }}>{s.value}</div>
                     </div>
-                    <div
-                      style={{
-                        fontSize: 24,
-                        color: "#ffffff",
-                        fontWeight: 900,
-                        fontFamily: "'Courier New', monospace",
-                      }}
-                    >
-                      {stat.value}
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
 
-              {/* Weakness */}
-              <div
-                style={{
-                  fontSize: 14,
-                  fontFamily: "'Courier New', monospace",
-                  color: "#ff6b35",
-                }}
-              >
-                WEAK: {enemy.weakness}
-              </div>
-
-              {/* Quote */}
-              <div
-                style={{
-                  fontSize: 16,
-                  fontFamily: "'Courier New', monospace",
-                  color: enemy.diffColor,
-                  marginTop: 15,
-                  opacity: 0.8,
-                }}
-              >
-                {enemy.personality}
+                {/* Weakness */}
+                <div style={{ fontSize: 13, fontFamily: "'Courier New', monospace", color: "#ff6b35" }}>
+                  WEAK: {enemy.weakness}
+                </div>
               </div>
             </div>
           );

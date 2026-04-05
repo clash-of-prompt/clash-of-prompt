@@ -3,7 +3,7 @@ name = "clash_of_prompt"
 version = "0.1.0"
 
 [addresses]
-clash_of_prompt = "_"
+clash_of_prompt = "0x160470ea843e34ff9ec826a9fa115cda95106e05"
 initia_std = "0x1"
 std = "0x1"
 

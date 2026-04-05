@@ -2,30 +2,54 @@
 
 import { useRouter } from "next/navigation";
 import { useI18n } from "@/lib/i18n";
+import { useState, useEffect } from "react";
 
-interface LeaderboardEntry {
-  rank: number;
-  address: string;
-  enemy: string;
-  score: number;
-  turns: number;
-  creativity: number;
+const ENEMY_NAMES: Record<string, string> = {
+  "1": "Slime King",
+  "2": "Shadow Wolf",
+  "3": "Ancient Golem",
+};
+
+function truncateAddress(addr: string): string {
+  if (addr.startsWith("0x") && addr.length > 12) {
+    return addr.slice(0, 6) + "..." + addr.slice(-4);
+  }
+  if (addr.startsWith("init") && addr.length > 15) {
+    return addr.slice(0, 8) + "..." + addr.slice(-4);
+  }
+  return addr;
 }
 
-const MOCK_DATA: LeaderboardEntry[] = [
-  { rank: 1, address: "0x742d...bD18", enemy: "Ancient Golem", score: 2450, turns: 6, creativity: 9.2 },
-  { rank: 2, address: "0x1a2b...3c4d", enemy: "Shadow Wolf", score: 2100, turns: 5, creativity: 8.7 },
-  { rank: 3, address: "0x5e6f...7g8h", enemy: "Ancient Golem", score: 1980, turns: 7, creativity: 8.5 },
-  { rank: 4, address: "0x9i0j...1k2l", enemy: "Shadow Wolf", score: 1750, turns: 4, creativity: 7.9 },
-  { rank: 5, address: "0x3m4n...5o6p", enemy: "Slime King", score: 1500, turns: 3, creativity: 7.5 },
-  { rank: 6, address: "0x7q8r...9s0t", enemy: "Slime King", score: 1320, turns: 4, creativity: 7.1 },
-  { rank: 7, address: "0xAb1c...Df2e", enemy: "Ancient Golem", score: 1200, turns: 8, creativity: 6.8 },
-  { rank: 8, address: "0xGh3i...Jk4l", enemy: "Shadow Wolf", score: 1050, turns: 5, creativity: 6.5 },
-];
+interface ChainEntry {
+  player: string;
+  enemy_id: string;
+  score: string;
+  turns: string;
+  avg_creativity: string;
+  timestamp: string;
+  is_pvp: boolean;
+}
 
 export default function LeaderboardPage() {
   const router = useRouter();
   const { t } = useI18n();
+  const [entries, setEntries] = useState<ChainEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [source, setSource] = useState("");
+
+  useEffect(() => {
+    fetch("/api/leaderboard")
+      .then((r) => r.json())
+      .then((data) => {
+        setEntries(data.entries || []);
+        setSource(data.source || "unknown");
+        setLoading(false);
+      })
+      .catch(() => {
+        setEntries([]);
+        setLoading(false);
+      });
+  }, []);
 
   return (
     <main className="min-h-screen flex items-center justify-center p-4">
@@ -34,10 +58,12 @@ export default function LeaderboardPage() {
           {t.leaderboard_title}
         </p>
         <div className="text-center text-dim mb-6">
-          Top players on-chain
+          {source === "on-chain" ? "Live from blockchain" : "Top players"}
         </div>
 
-        {MOCK_DATA.length === 0 ? (
+        {loading ? (
+          <p className="text-center text-amber glow-amber">Loading...</p>
+        ) : entries.length === 0 ? (
           <p className="text-center text-dim">{t.leaderboard_empty}</p>
         ) : (
           <div className="border border-[var(--green-dim)] overflow-x-auto">
@@ -50,28 +76,30 @@ export default function LeaderboardPage() {
                   <th className="text-right p-3 text-amber glow-amber">{t.score_label}</th>
                   <th className="text-right p-3 text-amber glow-amber">{t.turns_label}</th>
                   <th className="text-right p-3 text-amber glow-amber">Creativity</th>
+                  <th className="text-right p-3 text-amber glow-amber">PvP</th>
                 </tr>
               </thead>
               <tbody>
-                {MOCK_DATA.map((entry) => (
+                {entries.map((entry, i) => (
                   <tr
-                    key={entry.rank}
+                    key={i}
                     className={`border-b border-[var(--green-dim)] border-opacity-30 ${
-                      entry.rank <= 3 ? "text-green glow-green" : "text-white"
+                      i < 3 ? "text-green glow-green" : "text-white"
                     }`}
                   >
                     <td className="p-3">
-                      {entry.rank <= 3 ? (
-                        <span className="text-amber glow-amber">#{entry.rank}</span>
+                      {i < 3 ? (
+                        <span className="text-amber glow-amber">#{i + 1}</span>
                       ) : (
-                        `#${entry.rank}`
+                        `#${i + 1}`
                       )}
                     </td>
-                    <td className="p-3 font-mono text-cyan">{entry.address}</td>
-                    <td className="p-3">{entry.enemy}</td>
+                    <td className="p-3 font-mono text-cyan">{truncateAddress(entry.player)}</td>
+                    <td className="p-3">{ENEMY_NAMES[entry.enemy_id] || `Enemy ${entry.enemy_id}`}</td>
                     <td className="p-3 text-right text-amber glow-amber">{entry.score}</td>
                     <td className="p-3 text-right">{entry.turns}</td>
-                    <td className="p-3 text-right text-magenta">{entry.creativity}/10</td>
+                    <td className="p-3 text-right text-magenta">{(Number(entry.avg_creativity) / 100).toFixed(1)}/10</td>
+                    <td className="p-3 text-right">{entry.is_pvp ? "PvP" : ""}</td>
                   </tr>
                 ))}
               </tbody>

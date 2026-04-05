@@ -1,103 +1,98 @@
-import { AbsoluteFill, useCurrentFrame, interpolate, spring, useVideoConfig } from "remotion";
+import { AbsoluteFill, useCurrentFrame, interpolate, spring, useVideoConfig, Img, staticFile } from "remotion";
 
 export const Tagline = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  const words = ["YOUR", "WORDS", "ARE", "YOUR", "WEAPONS"];
+  // Hero image slides in from left
+  const heroX = spring({ frame, fps, config: { damping: 12, stiffness: 80 }, delay: 10 });
+  const heroSlide = interpolate(heroX, [0, 1], [-400, 0]);
+
+  // Battle scene fades in on right
+  const sceneOpacity = interpolate(frame, [30, 50], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const sceneScale = interpolate(frame, [30, 50], [1.1, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+
+  // Text reveals
+  const line1 = interpolate(frame, [60, 75], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const line2 = interpolate(frame, [85, 100], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const line3 = interpolate(frame, [110, 125], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+
+  // Divider line
+  const lineWidth = interpolate(frame, [130, 160], [0, 600], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+
+  // Exit
+  const exitFade = interpolate(frame, [190, 210], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
 
   return (
-    <AbsoluteFill
-      style={{
-        backgroundColor: "#0a0a14",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      {/* Radial glow */}
-      <div
-        style={{
-          position: "absolute",
-          width: 800,
-          height: 800,
-          borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(255,107,53,0.08) 0%, transparent 70%)",
-        }}
-      />
-
-      {/* Words appear one by one */}
-      <div
-        style={{
-          display: "flex",
-          gap: 25,
-          flexWrap: "wrap",
-          justifyContent: "center",
-          maxWidth: 1200,
-        }}
-      >
-        {words.map((word, i) => {
-          const delay = i * 12;
-          const wordScale = spring({
-            frame,
-            fps,
-            config: { damping: 10, stiffness: 120, mass: 0.8 },
-            delay: 15 + delay,
-          });
-
-          const isWeapons = word === "WEAPONS";
-
-          return (
-            <span
-              key={i}
-              style={{
-                fontSize: isWeapons ? 110 : 90,
-                fontFamily: "'Courier New', monospace",
-                fontWeight: 900,
-                color: isWeapons ? "#ff6b35" : "#ffffff",
-                textShadow: isWeapons
-                  ? "0 0 30px #ff6b3580, 0 0 60px #ff6b3540"
-                  : "0 0 20px rgba(255,255,255,0.2)",
-                transform: `scale(${wordScale})`,
-                opacity: wordScale,
-              }}
-            >
-              {word}
-            </span>
-          );
-        })}
+    <AbsoluteFill style={{ backgroundColor: "#050510", opacity: exitFade }}>
+      {/* Background battle scene - full bleed, dimmed */}
+      <div style={{
+        position: "absolute", inset: 0, opacity: sceneOpacity * 0.3,
+        transform: `scale(${sceneScale})`,
+        overflow: "hidden",
+      }}>
+        <Img src={staticFile("assets/battle-scene.png")} style={{
+          width: "100%", height: "100%", objectFit: "cover",
+          imageRendering: "pixelated",
+        }} />
       </div>
 
-      {/* Underline */}
-      <div
-        style={{
-          marginTop: 40,
-          height: 3,
-          backgroundColor: "#ff6b35",
-          boxShadow: "0 0 15px #ff6b35",
-          width: interpolate(frame, [100, 140], [0, 700], {
-            extrapolateLeft: "clamp",
-            extrapolateRight: "clamp",
-          }),
-        }}
-      />
+      {/* Dark gradient overlay */}
+      <div style={{
+        position: "absolute", inset: 0,
+        background: "linear-gradient(135deg, rgba(5,5,16,0.9) 0%, rgba(5,5,16,0.6) 50%, rgba(5,5,16,0.9) 100%)",
+      }} />
 
-      {/* Sub text */}
-      <div
-        style={{
-          marginTop: 30,
-          fontSize: 28,
+      {/* Hero portrait on left */}
+      <div style={{
+        position: "absolute", left: 80, bottom: 0,
+        transform: `translateX(${heroSlide}px)`,
+        opacity: heroX,
+      }}>
+        <Img src={staticFile("assets/hero.png")} style={{
+          height: 700, imageRendering: "pixelated",
+          filter: "drop-shadow(0 0 30px rgba(0,255,65,0.3))",
+        }} />
+      </div>
+
+      {/* Text content on right */}
+      <div style={{
+        position: "absolute", right: 120, top: "50%", transform: "translateY(-50%)",
+        maxWidth: 800,
+      }}>
+        <div style={{
+          fontSize: 52, fontWeight: 900, color: "#00ff41",
           fontFamily: "'Courier New', monospace",
-          color: "#00ff41",
-          opacity: interpolate(frame, [140, 160], [0, 1], {
-            extrapolateLeft: "clamp",
-            extrapolateRight: "clamp",
-          }),
-          letterSpacing: 4,
-        }}
-      >
-        A TURN-BASED RPG POWERED BY AI
+          opacity: line1, transform: `translateY(${(1 - line1) * 20}px)`,
+          textShadow: "0 0 30px rgba(0,255,65,0.5)",
+          marginBottom: 20,
+        }}>
+          WRITE YOUR ATTACK.
+        </div>
+        <div style={{
+          fontSize: 52, fontWeight: 900, color: "#ff6b35",
+          fontFamily: "'Courier New', monospace",
+          opacity: line2, transform: `translateY(${(1 - line2) * 20}px)`,
+          textShadow: "0 0 30px rgba(255,107,53,0.5)",
+          marginBottom: 20,
+        }}>
+          AI JUDGES YOUR CREATIVITY.
+        </div>
+        <div style={{
+          fontSize: 52, fontWeight: 900, color: "#ffffff",
+          fontFamily: "'Courier New', monospace",
+          opacity: line3, transform: `translateY(${(1 - line3) * 20}px)`,
+          textShadow: "0 0 20px rgba(255,255,255,0.3)",
+        }}>
+          DEAL MASSIVE DAMAGE.
+        </div>
+
+        {/* Divider */}
+        <div style={{
+          width: lineWidth, height: 3, marginTop: 30,
+          background: "linear-gradient(90deg, #00ff41, #ff6b35)",
+          boxShadow: "0 0 15px rgba(0,255,65,0.5)",
+        }} />
       </div>
     </AbsoluteFill>
   );

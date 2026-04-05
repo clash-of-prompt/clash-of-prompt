@@ -69,6 +69,44 @@ const server = http.createServer(async (req, res) => {
       return json(res, { status: "ok" });
     }
 
+    // GET /api/leaderboard
+    if (path === "/api/leaderboard" && req.method === "GET") {
+      try {
+        const lcdUrl = process.env.MINITIA_LCD_URL;
+        const moduleAddr = process.env.MODULE_ADDRESS;
+        if (!lcdUrl || !moduleAddr) {
+          return json(res, { entries: [], source: "no-chain" });
+        }
+        const r = await fetch(`${lcdUrl}/initia/move/v1/accounts/${moduleAddr}/modules/game_arena/view_functions/get_leaderboard`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ args: [] }),
+        });
+        const data = await r.json();
+        const entries = data.data ? JSON.parse(data.data) : [];
+        return json(res, { entries, source: "on-chain" });
+      } catch (e) {
+        console.error("[Leaderboard] Error:", e);
+        return json(res, { entries: [], source: "error" });
+      }
+    }
+
+    // GET /api/clash-balance?address=xxx
+    if (path === "/api/clash-balance" && req.method === "GET") {
+      const address = url.searchParams.get("address");
+      if (!address) return json(res, { balance: 0 });
+      try {
+        const lcdUrl = process.env.MINITIA_LCD_URL;
+        const moduleAddr = process.env.MODULE_ADDRESS;
+        if (!lcdUrl || !moduleAddr) return json(res, { balance: 0 });
+        // Query fungible asset balance via Move view
+        // For now return 0 — CLASH token minting needs debugging
+        return json(res, { balance: 0 });
+      } catch {
+        return json(res, { balance: 0 });
+      }
+    }
+
     // GET /api/enemies
     if (path === "/api/enemies" && req.method === "GET") {
       const enemies = ENEMIES.map((e) => ({
