@@ -250,26 +250,24 @@ const server = http.createServer(async (req, res) => {
           avgCreativity
         );
 
-        // Fire chain calls in parallel, don't block response on failure
-        const [scoreTx, mintTx, nftTx] = await Promise.all([
-          recordScore(
-            updatedBattle.walletAddress,
-            updatedBattle.enemyId,
-            updatedBattle.score,
-            updatedBattle.turn,
-            avgCreativity,
-            false
-          ),
-          mintClashToken(updatedBattle.walletAddress, tokensEarned),
-          mintVictoryNft(
-            updatedBattle.walletAddress,
-            updatedBattle.enemy.name,
-            updatedBattle.score,
-            updatedBattle.turn,
-            avgCreativity,
-            "" // imageUrl filled by client later or empty
-          ),
-        ]);
+        // Run chain calls sequentially (same account = sequence number conflicts if parallel)
+        const scoreTx = await recordScore(
+          updatedBattle.walletAddress,
+          updatedBattle.enemyId,
+          updatedBattle.score,
+          updatedBattle.turn,
+          avgCreativity,
+          false
+        );
+        const mintTx = await mintClashToken(updatedBattle.walletAddress, tokensEarned);
+        const nftTx = await mintVictoryNft(
+          updatedBattle.walletAddress,
+          updatedBattle.enemy.name,
+          updatedBattle.score,
+          updatedBattle.turn,
+          avgCreativity,
+          ""
+        );
 
         chain = {
           txHash: scoreTx || mintTx || nftTx || null,
