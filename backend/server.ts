@@ -99,10 +99,32 @@ const server = http.createServer(async (req, res) => {
         const lcdUrl = process.env.MINITIA_LCD_URL;
         const moduleAddr = process.env.MODULE_ADDRESS;
         if (!lcdUrl || !moduleAddr) return json(res, { balance: 0 });
-        // Query fungible asset balance via Move view
-        // For now return 0 — CLASH token minting needs debugging
-        return json(res, { balance: 0 });
-      } catch {
+        // BCS encode address: 32 bytes, left-padded with zeros
+        // Convert bech32 address to hex first
+        const { execSync } = await import("child_process");
+        const home = process.env.HOME || "/Users/askar";
+        const debugOut = execSync(
+          `initiad debug addr ${address} 2>&1`,
+          { env: { PATH: `${home}/.local/bin:/usr/bin:/bin`, HOME: home }, timeout: 5000 }
+        ).toString();
+        const hexMatch = debugOut.match(/Address \(hex\): ([A-Fa-f0-9]+)/);
+        if (!hexMatch) return json(res, { balance: 0 });
+
+        const addrHex = hexMatch[1].toLowerCase();
+        const bcsBytes = Buffer.alloc(32);
+        Buffer.from(addrHex, "hex").copy(bcsBytes, 12);
+        const bcsBase64 = bcsBytes.toString("base64");
+
+        const r = await fetch(`${lcdUrl}/initia/move/v1/accounts/${moduleAddr}/modules/game_arena/view_functions/get_clash_balance`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ args: [bcsBase64] }),
+        });
+        const data = await r.json();
+        const balance = data.data ? parseInt(JSON.parse(data.data)) : 0;
+        return json(res, { balance });
+      } catch (e) {
+        console.error("[Balance] Error:", e);
         return json(res, { balance: 0 });
       }
     }
@@ -168,6 +190,7 @@ const server = http.createServer(async (req, res) => {
     if (path === "/api/battle/turn" && req.method === "POST") {
       const body = JSON.parse(await readBody(req));
       const { battleId, prompt, locale, walletAddress } = body;
+      console.log(`[Turn] battleId=${battleId}, walletAddress=${walletAddress || "NONE"}`);
 
       if (!battleId || typeof battleId !== "string") {
         return json(res, { error: "battleId is required" }, 400);
@@ -213,7 +236,9 @@ const server = http.createServer(async (req, res) => {
 
       // Chain integration on victory
       let chain: { txHash: string | null; tokensEarned: number } | undefined;
+      console.log(`[Turn] status=${updatedBattle.status}, wallet=${updatedBattle.walletAddress || "NONE"}`);
       if (updatedBattle.status === "victory" && updatedBattle.walletAddress) {
+        console.log("[Chain] Victory detected! Firing on-chain calls...");
         const avgCreativity =
           updatedBattle.turnHistory.reduce((sum, t) => sum + t.creativityScore, 0) /
           updatedBattle.turnHistory.length;

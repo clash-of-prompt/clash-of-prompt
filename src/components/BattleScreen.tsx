@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useI18n } from "@/lib/i18n";
+import { useWallet } from "@/lib/wallet";
 import HpBar from "./HpBar";
 import BattleComic, { cropComicPanels } from "./BattleComic";
 
@@ -65,6 +66,7 @@ export default function BattleScreen({
   battleId, enemyId, enemyName, enemyDescription, intro, initialBattle, onBattleEnd,
 }: BattleScreenProps) {
   const { t, locale } = useI18n();
+  const { address: walletAddress } = useWallet();
   const [battle, setBattle] = useState<BattleState>(initialBattle);
   const [log, setLog] = useState<LogEntry[]>([]);
   const [prompt, setPrompt] = useState("");
@@ -146,7 +148,7 @@ export default function BattleScreen({
       const res = await fetch("/api/battle/turn", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ battleId, prompt: playerPrompt, locale }),
+        body: JSON.stringify({ battleId, prompt: playerPrompt, locale, walletAddress }),
       });
       if (res.status === 429) { const data = await res.json(); setError(data.error); setSubmitting(false); return; }
       if (!res.ok) { const data = await res.json(); throw new Error(data.error || "Failed to process turn"); }
