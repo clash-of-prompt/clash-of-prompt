@@ -3,7 +3,8 @@
 import { useState, useCallback, useEffect } from "react";
 import { WalletContext } from "@/lib/wallet";
 
-const MOCK_ADDRESS = "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD18";
+// Use real gas station address for testing (will be replaced by InterwovenKit)
+const MOCK_ADDRESS = "init1zcz8p65y8c60l8kgy65l5y2um223qms95kayp3";
 const MOCK_CHAIN_ID = 1;
 
 export default function WalletProvider({
