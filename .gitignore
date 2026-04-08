@@ -55,3 +55,6 @@ next-env.d.ts
 initia-keys.md
 setup-commands.md
 .weave/
+/deploy/libs/
+/move/build/
+/.move/
