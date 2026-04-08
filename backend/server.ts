@@ -77,13 +77,20 @@ const server = http.createServer(async (req, res) => {
         if (!lcdUrl || !moduleAddr) {
           return json(res, { entries: [], source: "no-chain" });
         }
-        const r = await fetch(`${lcdUrl}/initia/move/v1/accounts/${moduleAddr}/modules/game_arena/view_functions/get_leaderboard`, {
+        // Use 127.0.0.1 instead of localhost to avoid IPv6 resolution issues
+        const url = lcdUrl.replace('localhost', '127.0.0.1');
+        const fetchUrl = `${url}/initia/move/v1/accounts/${moduleAddr}/modules/game_arena/view_functions/get_leaderboard`;
+        console.log("[Leaderboard] Fetching:", fetchUrl);
+        const r = await fetch(fetchUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ args: [] }),
         });
-        const data = await r.json();
+        const rawText = await r.text();
+        console.log("[Leaderboard] Response status:", r.status, "body length:", rawText.length);
+        const data = JSON.parse(rawText);
         const entries = data.data ? JSON.parse(data.data) : [];
+        console.log("[Leaderboard] Entries:", entries.length);
         return json(res, { entries, source: "on-chain" });
       } catch (e) {
         console.error("[Leaderboard] Error:", e);
@@ -115,7 +122,8 @@ const server = http.createServer(async (req, res) => {
         Buffer.from(addrHex, "hex").copy(bcsBytes, 12);
         const bcsBase64 = bcsBytes.toString("base64");
 
-        const r = await fetch(`${lcdUrl}/initia/move/v1/accounts/${moduleAddr}/modules/game_arena/view_functions/get_clash_balance`, {
+        const url2 = lcdUrl.replace('localhost', '127.0.0.1');
+        const r = await fetch(`${url2}/initia/move/v1/accounts/${moduleAddr}/modules/game_arena/view_functions/get_clash_balance`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ args: [bcsBase64] }),

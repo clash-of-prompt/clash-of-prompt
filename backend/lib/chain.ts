@@ -34,7 +34,7 @@ async function execMove(
     `--args '${argsJson}'`,
     `--from ${process.env.CHAIN_KEY_NAME || "gasstation"}`,
     `--chain-id ${config.chainId}`,
-    "--node http://localhost:26657",
+    "--node http://127.0.0.1:26657",
     "--keyring-backend test",
     `--home ${process.env.MINITIA_HOME || process.env.HOME + "/.minitia"}`,
     "--gas auto",

@@ -48,11 +48,11 @@ echo "[Start] Operator: $OPERATOR_ADDR"
 echo "[Backend] Starting..."
 cd /app/backend
 
-export MINITIA_LCD_URL=http://localhost:1317
-export MINITIA_CHAIN_ID=clashofprompt-1
-export MODULE_ADDRESS="$OPERATOR_ADDR"
-export CHAIN_KEY_NAME="operator"
-export MINITIA_HOME="$DATA_DIR"
-export PORT=8080
+export MINITIA_LCD_URL="${MINITIA_LCD_URL:-http://127.0.0.1:1317}"
+export MINITIA_CHAIN_ID="${MINITIA_CHAIN_ID:-clashofprompt-1}"
+export MODULE_ADDRESS="${MODULE_ADDRESS:-init1zcz8p65y8c60l8kgy65l5y2um223qms95kayp3}"
+export CHAIN_KEY_NAME="${CHAIN_KEY_NAME:-gasstation}"
+export MINITIA_HOME="${MINITIA_HOME:-$DATA_DIR}"
+export PORT="${PORT:-8080}"
 
 exec node dist/server.js
