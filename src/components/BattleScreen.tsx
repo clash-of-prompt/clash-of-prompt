@@ -18,6 +18,7 @@ interface BattleScreenProps {
     score: number;
     turns: number;
     enemyName: string;
+    chain?: { txHash: string | null; tokensEarned: number };
   }) => void;
 }
 
@@ -77,6 +78,7 @@ export default function BattleScreen({
   const logEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const [chainResult, setChainResult] = useState<{ txHash: string | null; tokensEarned: number } | undefined>();
   const [comicPhase, setComicPhase] = useState<ComicPhase>("idle");
   const [allPanels, setAllPanels] = useState<string[]>([]);
   const [pendingTurn, setPendingTurn] = useState<PendingTurn | null>(null);
@@ -155,6 +157,7 @@ export default function BattleScreen({
 
       const data = await res.json();
       const { turn, battle: updatedBattle } = data;
+      if (data.chain) setChainResult(data.chain);
 
       const playerEntries: LogEntry[] = [{ type: "narrative", text: turn.narrative }];
       if (turn.damageToEnemy > 0)
@@ -254,7 +257,7 @@ export default function BattleScreen({
           <p className={`text-lg mb-3 ${battle.status === "victory" ? "text-green glow-green" : battle.status === "defeat" ? "text-red glow-red" : "text-amber glow-amber"}`}>
             {battle.status === "victory" ? t.enemy_defeated(enemyName) : battle.status === "defeat" ? t.you_fallen : t.battle_timeout}
           </p>
-          <button onClick={() => onBattleEnd({ status: battle.status as "victory" | "defeat" | "timeout", score: battle.score, turns: battle.turn, enemyName })}
+          <button onClick={() => onBattleEnd({ status: battle.status as "victory" | "defeat" | "timeout", score: battle.score, turns: battle.turn, enemyName, chain: chainResult })}
             className="terminal-btn text-green glow-green text-lg px-6 py-2">{t.view_results}</button>
         </div>
       )}
