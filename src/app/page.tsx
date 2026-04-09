@@ -32,6 +32,7 @@ interface BattleResult {
   score: number;
   turns: number;
   enemyName: string;
+  chain?: { txHash: string | null; tokensEarned: number };
 }
 
 export default function Home() {
