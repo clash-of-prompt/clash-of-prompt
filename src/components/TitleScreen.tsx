@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useI18n } from "@/lib/i18n";
+import { useWallet } from "@/lib/wallet";
 import LanguageSwitcher from "./LanguageSwitcher";
 import WalletButton from "./WalletButton";
 
@@ -25,6 +26,7 @@ const TITLE_ART = `
 `.trim();
 
 export default function TitleScreen({ onStart }: TitleScreenProps) {
+  const { connected } = useWallet();
   const [showPrompt, setShowPrompt] = useState(false);
   const { t } = useI18n();
 
@@ -61,14 +63,19 @@ export default function TitleScreen({ onStart }: TitleScreenProps) {
       </div>
 
       {showPrompt && (
-        <div className="fade-in">
+        <div className="fade-in space-y-3">
           <button
             onClick={onStart}
             className="terminal-btn text-xl px-8 py-3 glow-green"
           >
             {t.start_game}
           </button>
-          <p className="text-dim text-sm mt-4 cursor-blink">
+          <p className="text-dim text-xs mt-2">
+            {connected
+              ? `✓ ${t.score_on_chain}`
+              : t.connect_to_save}
+          </p>
+          <p className="text-dim text-sm cursor-blink">
             {t.press_enter}
           </p>
         </div>
