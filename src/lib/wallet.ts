@@ -4,22 +4,20 @@ import { createContext, useContext } from "react";
 
 export interface WalletState {
   address: string | null;
-  chainId: number;
   connected: boolean;
   clashBalance: number;
-  connect: () => Promise<void>;
-  disconnect: () => void;
-  getClashBalance: () => Promise<number>;
+  connect: () => void;
+  disconnect: () => Promise<void>;
+  view: (e: React.MouseEvent) => void;
 }
 
 const defaultWalletState: WalletState = {
   address: null,
-  chainId: 0,
   connected: false,
   clashBalance: 0,
-  connect: async () => {},
-  disconnect: () => {},
-  getClashBalance: async () => 0,
+  connect: () => {},
+  disconnect: async () => {},
+  view: () => {},
 };
 
 export const WalletContext = createContext<WalletState>(defaultWalletState);

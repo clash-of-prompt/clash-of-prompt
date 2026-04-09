@@ -58,3 +58,5 @@ setup-commands.md
 /deploy/libs/
 /move/build/
 /.move/
+/deploy/minitia-full.tar.gz
+/deploy/minitia-config.tar.gz
