@@ -20,7 +20,7 @@ export const EnemiesShowcase = () => {
     <AbsoluteFill style={{ backgroundColor: "#050510", opacity: exitFade }}>
       {/* Title */}
       <div style={{
-        position: "absolute", top: 50, left: "50%", transform: "translateX(-50%)",
+        position: "absolute", top: 30, left: "50%", transform: "translateX(-50%)",
         opacity: titleOp, textAlign: "center",
       }}>
         <div style={{ fontSize: 20, color: "#ff3333", fontFamily: "'Courier New', monospace", letterSpacing: 8, marginBottom: 8 }}>
@@ -33,7 +33,7 @@ export const EnemiesShowcase = () => {
 
       {/* Enemy cards */}
       <div style={{
-        position: "absolute", top: 180, left: 0, right: 0,
+        position: "absolute", top: 140, left: 0, right: 0,
         display: "flex", justifyContent: "center", gap: 40, padding: "0 60px",
       }}>
         {enemies.map((enemy, i) => {
@@ -55,7 +55,7 @@ export const EnemiesShowcase = () => {
               boxShadow: highlightGlow > 0 ? `0 0 30px ${enemy.color}40` : "none",
             }}>
               {/* Enemy portrait */}
-              <div style={{ width: "100%", height: 320, overflow: "hidden", borderBottom: `2px solid ${enemy.color}30` }}>
+              <div style={{ width: "100%", height: 280, overflow: "hidden", borderBottom: `2px solid ${enemy.color}30` }}>
                 <Img src={staticFile(`assets/${enemy.image}`)} style={{
                   width: "100%", height: "100%", objectFit: "cover",
                   imageRendering: "pixelated",

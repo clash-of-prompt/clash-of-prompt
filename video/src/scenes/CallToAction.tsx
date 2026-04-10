@@ -60,7 +60,7 @@ export const CallToAction = () => {
 
       {/* Logo */}
       <div style={{
-        position: "absolute", top: "18%", left: "50%",
+        position: "absolute", top: "22%", left: "50%",
         transform: `translate(-50%, -50%) scale(${logoScale})`,
         filter: `drop-shadow(0 0 ${30 * pulse}px rgba(0,255,65,0.3))`,
       }}>
@@ -69,7 +69,7 @@ export const CallToAction = () => {
 
       {/* Enemy portraits row */}
       <div style={{
-        position: "absolute", top: "45%", left: "50%", transform: "translate(-50%, -50%)",
+        position: "absolute", top: "48%", left: "50%", transform: "translate(-50%, -50%)",
         display: "flex", gap: 30, alignItems: "center",
       }}>
         {[
