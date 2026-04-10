@@ -144,6 +144,7 @@ export const HowItWorks = () => {
         <div style={{ position: "absolute", top: 60, left: "50%", transform: `translateX(-50%) scale(${step3Scale})` }}>
           <div style={{ fontSize: 22, color: "#ff3333", fontFamily: "'Courier New', monospace", letterSpacing: 6, opacity: 0.6 }}>STEP 03</div>
           <div style={{ fontSize: 48, color: "#ffffff", fontFamily: "'Courier New', monospace", fontWeight: 900, textShadow: "0 0 20px rgba(255,255,255,0.2)" }}>DEAL DAMAGE</div>
+          <div style={{ fontSize: 20, color: "#6b5bff", fontFamily: "'Courier New', monospace", marginTop: 8, letterSpacing: 3, opacity: 0.8 }}>RECORDED ON BLOCKCHAIN</div>
         </div>
 
         {/* Big damage number */}

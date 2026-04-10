@@ -127,7 +127,7 @@ export const CallToAction = () => {
         opacity: poweredOp, fontSize: 16, fontFamily: "'Courier New', monospace",
         color: "#555", letterSpacing: 4,
       }}>
-        POWERED BY CLAUDE AI + GEMINI
+        POWERED BY CLAUDE AI + GEMINI + INITIA
       </div>
     </AbsoluteFill>
   );
