@@ -323,6 +323,60 @@ const server = http.createServer(async (req, res) => {
 
     }
 
+    // Chain REST API proxy — expose minitia LCD endpoints externally
+    if (path.startsWith("/chain/")) {
+      const CHAIN_BASE = "http://127.0.0.1:1317";
+      const segments = path.split("/").filter(Boolean); // ["chain", ...]
+
+      let targetUrl: string | null = null;
+      let method: string = "GET";
+
+      if (segments.length === 2 && segments[1] === "node_info") {
+        // GET /chain/node_info
+        targetUrl = `${CHAIN_BASE}/cosmos/base/tendermint/v1beta1/node_info`;
+      } else if (segments.length === 4 && segments[1] === "modules") {
+        // GET /chain/modules/:address/:module
+        const [, , address, module] = segments;
+        targetUrl = `${CHAIN_BASE}/initia/move/v1/accounts/${address}/modules/${module}`;
+      } else if (segments.length === 5 && segments[1] === "view") {
+        // POST /chain/view/:address/:module/:function
+        const [, , address, module, fn] = segments;
+        targetUrl = `${CHAIN_BASE}/initia/move/v1/accounts/${address}/modules/${module}/view_functions/${fn}`;
+        method = "POST";
+      } else if (segments.length === 3 && segments[1] === "balances") {
+        // GET /chain/balances/:address
+        const [, , address] = segments;
+        targetUrl = `${CHAIN_BASE}/cosmos/bank/v1beta1/balances/${address}`;
+      } else if (segments.length === 3 && segments[1] === "txs") {
+        // GET /chain/txs/:hash
+        const [, , hash] = segments;
+        targetUrl = `${CHAIN_BASE}/cosmos/tx/v1beta1/txs/${hash}`;
+      }
+
+      if (targetUrl) {
+        try {
+          const fetchOpts: RequestInit = {
+            method,
+            headers: { "Content-Type": "application/json" },
+          };
+          if (method === "POST") {
+            fetchOpts.body = await readBody(req);
+          }
+          const chainRes = await fetch(targetUrl, fetchOpts);
+          const data = await chainRes.text();
+          res.writeHead(chainRes.status, {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": req.headers.origin || "*",
+          });
+          res.end(data);
+          return;
+        } catch (e) {
+          console.error("[Chain proxy] Error:", e);
+          return json(res, { error: "chain unavailable" }, 502);
+        }
+      }
+    }
+
     // 404
     json(res, { error: "Not found" }, 404);
   } catch (error) {
