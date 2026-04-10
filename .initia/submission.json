@@ -1,6 +1,6 @@
 {
   "project_name": "Clash of Prompt",
-  "description": "An on-chain AI battle RPG on Initia where creativity is your weapon. Type prompts to fight monsters, earn CLASH tokens, mint victory NFTs, and compete in PvP arenas — all on-chain.",
+  "description": "An on-chain AI battle RPG on Initia where creativity is your weapon. Type prompts to fight monsters, earn CLASH tokens, and compete in PvP arenas — all on-chain with Move smart contracts on our own Minitia rollup.",
   "track": "Gaming & Consumer",
   "team": ["Askar", "Alrix"],
   "github": "https://github.com/clash-of-prompt/clash-of-prompt",
@@ -13,10 +13,17 @@
     "game_arena": "On-chain leaderboard, score recording, CLASH balance tracking, PvP wager system",
     "victory_nft": "NFT collection minted on battle victories with metadata"
   },
+  "deployment": {
+    "frontend": "https://clash-of-prompt.vercel.app",
+    "backend": "https://clash-of-prompt-full.fly.dev",
+    "chain_node_info": "https://clash-of-prompt-full.fly.dev/chain/node_info",
+    "chain_modules": "https://clash-of-prompt-full.fly.dev/chain/modules/init1zcz8p65y8c60l8kgy65l5y2um223qms95kayp3/game_arena",
+    "leaderboard_api": "https://clash-of-prompt-full.fly.dev/api/leaderboard"
+  },
   "native_features": ["auto-signing"],
   "tech_stack": [
     "Next.js 16 + React 19 (Vercel)",
-    "Node.js backend + Claude CLI (Fly.io)",
+    "Node.js backend + Claude CLI + Initia node (Fly.io)",
     "Move VM smart contracts (Initia Minitia)",
     "Gemini AI (battle image generation)",
     "Claude AI (game master)"

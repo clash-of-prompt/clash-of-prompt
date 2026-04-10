@@ -76,7 +76,7 @@ export const Tagline = () => {
           textShadow: "0 0 30px rgba(255,107,53,0.5)",
           marginBottom: 20,
         }}>
-          AI JUDGES YOUR CREATIVITY.
+          BATTLE ON-CHAIN.
         </div>
         <div style={{
           fontSize: 52, fontWeight: 900, color: "#ffffff",
@@ -84,7 +84,7 @@ export const Tagline = () => {
           opacity: line3, transform: `translateY(${(1 - line3) * 20}px)`,
           textShadow: "0 0 20px rgba(255,255,255,0.3)",
         }}>
-          DEAL MASSIVE DAMAGE.
+          EARN ON INITIA.
         </div>
 
         {/* Divider */}

@@ -1,10 +1,10 @@
 import { AbsoluteFill, useCurrentFrame, interpolate, spring, useVideoConfig, Img, staticFile } from "remotion";
 
 const features = [
-  { title: "CREATIVITY SCORING", desc: "AI rates your prompts 1-10.\nGeneric attacks deal 5 damage.\nCreative ones deal 35+.", color: "#ff6b35" },
-  { title: "STATUS EFFECTS", desc: "Poison, Burn, Stun, Shield, Heal.\nChain effects for devastating combos.", color: "#00ff41" },
-  { title: "BATTLE COMICS", desc: "Every turn generates a unique\npixel art comic panel.\nYour battles become visual stories.", color: "#6b5bff" },
-  { title: "BILINGUAL", desc: "Play in English or Bahasa Indonesia.\nAI adapts narration to your language.", color: "#ffaa00" },
+  { title: "ON-CHAIN LEADERBOARD", desc: "Every score is recorded on\nthe Initia blockchain.\nFully verified and transparent.", color: "#ff6b35" },
+  { title: "CLASH TOKEN REWARDS", desc: "Earn CLASH tokens for\ncreative battles.\nThe better your prompts, the more you earn.", color: "#00ff41" },
+  { title: "VICTORY NFTs", desc: "Mint NFTs from your best battles.\nOwn your greatest moments\nas on-chain collectibles.", color: "#6b5bff" },
+  { title: "CREATIVITY SCORING", desc: "AI rates your prompts 1-10.\nGeneric attacks deal 5 damage.\nCreative ones deal 35+.", color: "#ffaa00" },
 ];
 
 export const Features = () => {
